@@ -1,16 +1,23 @@
-# fluent_path
+# FluentPath-AI
 
-A new Flutter project.
+FluentPath AI is an AI-powered English learning app built with Flutter. Practice real-life conversations, improve vocabulary, take grammar quizzes, track streaks, earn XP, and learn English with smart AI tutors in a modern gamified experience.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Install dependencies:
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Run the app:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter run
+```
+
+For AI features, pass your Groq API key at build/run time:
+
+```bash
+flutter run --dart-define=GROQ_API_KEY=your_key_here
+```
