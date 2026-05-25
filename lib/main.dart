@@ -14,8 +14,12 @@ import 'screens/splash/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize the SQLite database connection before booting UI
-  await DatabaseHelper.instance.database;
+  try {
+    // Initialize the SQLite database connection before booting UI
+    await DatabaseHelper.instance.database;
+  } catch (e) {
+    debugPrint("Database helper initialization failed: $e");
+  }
 
   runApp(
     MultiProvider(

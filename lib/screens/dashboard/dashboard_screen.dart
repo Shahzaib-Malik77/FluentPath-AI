@@ -10,6 +10,8 @@ import '../daily_goals/daily_goals_screen.dart';
 import '../practice/practice_topics_screen.dart';
 import '../vocabulary/vocabulary_screen.dart';
 import '../quiz/grammar_quiz_screen.dart';
+import '../profile/profile_screen.dart';
+import '../../core/widgets/app_avatar.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -91,23 +93,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Custom Top Bar (Greeting)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      '${_getGreeting()},',
-                      style: AppTextStyles.body.copyWith(
-                        color: Colors.white.withOpacity(0.6),
-                        fontSize: 16,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${_getGreeting()},',
+                            style: AppTextStyles.body.copyWith(
+                              color: Colors.white.withOpacity(0.6),
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${userProvider.name}!',
+                            style: AppTextStyles.heading2.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${userProvider.name}!',
-                      style: AppTextStyles.heading2.copyWith(
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
+                        );
+                      },
+                      child: AppAvatar(
+                        avatarIndex: userProvider.avatarIndex,
+                        customAvatarBase64: userProvider.customAvatarBase64,
+                        size: 46,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -267,7 +292,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         title: 'AI Practice',
                         subtitle: 'Scenario Chats',
                         icon: Icons.chat_bubble_outline_rounded,
-                        color: AppColors.primaryGreen,
+                        color: const Color(0xFF1E4627), // Medium Forest Green
                         destination: const PracticeTopicsScreen(),
                       ),
                     ),
@@ -277,8 +302,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         context,
                         title: 'Vocabulary',
                         subtitle: 'Learn new words',
-                        icon: Icons.book_outlined,
-                        color: AppColors.ctaBrown,
+                        icon: Icons.menu_book_rounded, // Beautiful book icon for vocabulary
+                        color: const Color(0xFF2E7D32), // Healing Emerald Green
                         destination: const VocabularyScreen(),
                       ),
                     ),
@@ -293,7 +318,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         title: 'Grammar Quiz',
                         subtitle: 'Test your rules',
                         icon: Icons.quiz_outlined,
-                        color: AppColors.xpPurple,
+                        color: const Color(0xFF387F4A), // Vibrant Grass Green
                         destination: const GrammarQuizScreen(),
                       ),
                     ),
@@ -304,7 +329,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         title: 'Daily Goals',
                         subtitle: 'Check milestones',
                         icon: Icons.flag_outlined,
-                        color: AppColors.streakMint,
+                        color: const Color(0xFF0F2E15), // Deep Forest Green
                         destination: const DailyGoalsScreen(),
                       ),
                     ),
@@ -461,12 +486,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withOpacity(0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                color: color == AppColors.primaryGreen ? AppColors.brightGreen : color,
+                color: color,
                 size: 24,
               ),
             ),

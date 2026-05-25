@@ -7,6 +7,7 @@ class BackgroundScaffold extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
+  final bool? resizeToAvoidBottomInset;
 
   const BackgroundScaffold({
     super.key,
@@ -15,6 +16,7 @@ class BackgroundScaffold extends StatelessWidget {
     this.bottomNavigationBar,
     this.floatingActionButton,
     this.floatingActionButtonLocation,
+    this.resizeToAvoidBottomInset,
   });
 
   @override
@@ -38,6 +40,7 @@ class BackgroundScaffold extends StatelessWidget {
         bottomNavigationBar: bottomNavigationBar,
         floatingActionButton: floatingActionButton,
         floatingActionButtonLocation: floatingActionButtonLocation,
+        resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       ),
     );
   }

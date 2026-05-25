@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/database/database_helper.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -22,14 +23,55 @@ class UserProvider extends ChangeNotifier {
   String get nextLevel  => totalXP < 500 ? 'Intermediate' : 'Advanced';
   bool get isLoaded     => _user != null;
 
+  String? _customAvatarBase64;
+  String? get customAvatarBase64 => _customAvatarBase64;
+
+  UserProvider() {
+    loadUser();
+  }
+
   Future<void> loadUser() async {
-    _user = await DatabaseHelper.instance.getUser();
+    var u = await DatabaseHelper.instance.getUser();
+    final prefs = await SharedPreferences.getInstance();
+    
+    if (u == null) {
+      final isOnboarded = prefs.getBool('isOnboarded') ?? false;
+      if (isOnboarded) {
+        // Self-heal: Database is empty but user is onboarded. Insert default profile.
+        await DatabaseHelper.instance.insertUser({
+          'name': 'User',
+          'avatar_index': 0,
+          'level': 'Beginner',
+          'total_xp': 0,
+          'daily_goal_mins': 15,
+          'selected_tutor': 'Friendly Buddy',
+          'created_at': DateTime.now().toIso8601String(),
+        });
+        u = await DatabaseHelper.instance.getUser();
+      }
+    }
+    
+    _user = u;
+    _customAvatarBase64 = prefs.getString('custom_avatar_base64');
     notifyListeners();
   }
+
+  Future<void> updateCustomAvatar(String? base64Str) async {
+    _customAvatarBase64 = base64Str;
+    final prefs = await SharedPreferences.getInstance();
+    if (base64Str != null) {
+      await prefs.setString('custom_avatar_base64', base64Str);
+    } else {
+      await prefs.remove('custom_avatar_base64');
+    }
+    notifyListeners();
+  }
+
   Future<void> addXP(int amount) async {
     await DatabaseHelper.instance.updateUser({'total_xp': totalXP + amount});
     await loadUser();
   }
+
   Future<void> updateProfile({
     String? name,
     String? avatar,
@@ -48,10 +90,26 @@ class UserProvider extends ChangeNotifier {
     if (dailyGoalMins != null) values['daily_goal_mins'] = dailyGoalMins;
 
     if (values.isNotEmpty) {
+      // Optimistic update for smooth, lag-free UI feedback
+      if (_user != null) {
+        _user = Map<String, dynamic>.from(_user!)..addAll(values);
+      } else {
+        _user = {
+          'name': name ?? 'User',
+          'avatar_index': values['avatar_index'] ?? 0,
+          'level': level ?? 'Beginner',
+          'total_xp': 0,
+          'daily_goal_mins': dailyGoalMins ?? 15,
+          'selected_tutor': 'Friendly Buddy',
+        };
+      }
+      notifyListeners();
+
       await DatabaseHelper.instance.updateUser(values);
       await loadUser();
     }
   }
+
   Future<bool> hasUser() async =>
     (await DatabaseHelper.instance.getUser()) != null;
 }

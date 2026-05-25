@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import '../constants/app_colors.dart';
 
 class AppAvatar extends StatelessWidget {
   final int avatarIndex;
+  final String? customAvatarBase64;
   final double size;
   final bool isSelected;
   final VoidCallback? onTap;
@@ -10,6 +12,7 @@ class AppAvatar extends StatelessWidget {
   const AppAvatar({
     super.key,
     required this.avatarIndex,
+    this.customAvatarBase64,
     this.size = 64,
     this.isSelected = false,
     this.onTap,
@@ -35,41 +38,64 @@ class AppAvatar extends StatelessWidget {
     final gradient = gradients[index];
     final emoji = emojis[index];
 
-    Widget avatarContent = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: gradient,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: gradient[0].withOpacity(0.35),
-            blurRadius: size * 0.25,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
+    Widget avatarContent;
+    if (customAvatarBase64 != null && customAvatarBase64!.isNotEmpty) {
+      avatarContent = Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: MemoryImage(base64Decode(customAvatarBase64!)),
+            fit: BoxFit.cover,
           ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          emoji,
-          style: TextStyle(
-            fontSize: size * 0.52,
-            shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 4,
-                offset: const Offset(1, 2),
-              ),
-            ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: size * 0.2,
+              spreadRadius: 1,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+      );
+    } else {
+      avatarContent = Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: gradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: gradient[0].withOpacity(0.35),
+              blurRadius: size * 0.25,
+              spreadRadius: 1,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            emoji,
+            style: TextStyle(
+              fontSize: size * 0.52,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: const Offset(1, 2),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
     if (onTap != null || isSelected) {
       return GestureDetector(

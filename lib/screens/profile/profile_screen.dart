@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../providers/user_provider.dart';
@@ -8,6 +10,7 @@ import '../../providers/streak_provider.dart';
 import '../../data/database/database_helper.dart';
 import '../splash/splash_screen.dart';
 import '../../core/widgets/app_avatar.dart';
+import '../../core/widgets/background_scaffold.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -17,11 +20,21 @@ class ProfileScreen extends StatelessWidget {
     final userProvider = context.watch<UserProvider>();
     final streakProvider = context.watch<StreakProvider>();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return BackgroundScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: true,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
         title: const Text(
           'My Profile',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
@@ -42,6 +55,7 @@ class ProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(4.0),
                         child: AppAvatar(
                           avatarIndex: userProvider.avatarIndex,
+                          customAvatarBase64: userProvider.customAvatarBase64,
                           size: 100,
                         ),
                       ),
@@ -184,6 +198,40 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _pickAndSaveCustomAvatar(BuildContext context, UserProvider userProvider) async {
+    try {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 500,
+        maxHeight: 500,
+        imageQuality: 85,
+      );
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        final base64String = base64Encode(bytes);
+        await userProvider.updateCustomAvatar(base64String);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profile picture updated successfully!'),
+              backgroundColor: AppColors.brightGreen,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick image: $e'),
+            backgroundColor: AppColors.wrong,
+          ),
+        );
+      }
+    }
+  }
+
   void _showAvatarPicker(BuildContext context, UserProvider userProvider) {
     final List<String> avatars = ['👨‍🎓', '👩‍🎓', '🤖', '🦊', '🐨', '🦁', '🦖', '🦄'];
     showModalBottomSheet(
@@ -205,7 +253,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -239,8 +287,9 @@ class ProfileScreen extends StatelessWidget {
                     return AppAvatar(
                       avatarIndex: index,
                       size: 54,
-                      isSelected: userProvider.avatarIndex == index,
+                      isSelected: userProvider.avatarIndex == index && userProvider.customAvatarBase64 == null,
                       onTap: () async {
+                        await userProvider.updateCustomAvatar(null);
                         await userProvider.updateProfile(
                           name: userProvider.name,
                           avatar: av,
@@ -253,6 +302,60 @@ class ProfileScreen extends StatelessWidget {
                       },
                     );
                   },
+                ),
+                const SizedBox(height: 24),
+                const Divider(color: Colors.white10),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          await _pickAndSaveCustomAvatar(context, userProvider);
+                        },
+                        icon: const Icon(Icons.photo_library_rounded, color: Colors.white),
+                        label: const Text(
+                          'Upload Picture',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.brightGreen,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (userProvider.customAvatarBase64 != null) ...[
+                      const SizedBox(width: 12),
+                      IconButton(
+                        onPressed: () async {
+                          await userProvider.updateCustomAvatar(null);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Custom profile image removed'),
+                                backgroundColor: AppColors.bgMedBrown,
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.delete_forever_rounded, color: AppColors.wrong),
+                        tooltip: 'Remove Custom Image',
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.08),
+                          padding: const EdgeInsets.all(12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: const BorderSide(color: Colors.white10),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),

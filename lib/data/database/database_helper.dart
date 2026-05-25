@@ -98,12 +98,28 @@ class DatabaseHelper {
     (await database).insert('user_profile', user);
 
   Future<Map<String, dynamic>?> getUser() async {
-    final r = await (await database).query('user_profile', limit: 1);
+    final r = await (await database).query('user_profile', orderBy: 'id DESC', limit: 1);
     return r.isNotEmpty ? r.first : null;
   }
 
-  Future<int> updateUser(Map<String, dynamic> values) async =>
-    (await database).update('user_profile', values, where: 'id = ?', whereArgs: [1]);
+  Future<int> updateUser(Map<String, dynamic> values) async {
+    final db = await database;
+    final r = await db.query('user_profile', orderBy: 'id DESC', limit: 1);
+    if (r.isNotEmpty) {
+      final actualId = r.first['id'];
+      return await db.update('user_profile', values, where: 'id = ?', whereArgs: [actualId]);
+    } else {
+      return await db.insert('user_profile', {
+        'name': values['name'] ?? 'User',
+        'avatar_index': values['avatar_index'] ?? 0,
+        'level': values['level'] ?? 'Beginner',
+        'total_xp': values['total_xp'] ?? 0,
+        'daily_goal_mins': values['daily_goal_mins'] ?? 15,
+        'selected_tutor': values['selected_tutor'] ?? 'Friendly Buddy',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    }
+  }
 
   // ── SESSIONS ──────────────────────────────────────────
   Future<int> insertSession(Map<String, dynamic> s) async =>

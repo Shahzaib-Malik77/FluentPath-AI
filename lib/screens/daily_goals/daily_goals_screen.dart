@@ -22,6 +22,7 @@ class _DailyGoalsScreenState extends State<DailyGoalsScreen> with SingleTickerPr
   int _streak = 0;
   List<Map<String, dynamic>> _last7Days = [];
   bool _showConfetti = false;
+  bool _isLoading = true;
   late AnimationController _confettiController;
 
   @override
@@ -31,7 +32,16 @@ class _DailyGoalsScreenState extends State<DailyGoalsScreen> with SingleTickerPr
       vsync: this,
       duration: const Duration(seconds: 2),
     );
-    _loadData();
+    
+    // We delay the heavy database queries to let the transition push animation
+    // complete smoothly at full 60 FPS without dropping frames!
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          _loadData();
+        }
+      });
+    });
   }
 
   @override
@@ -41,23 +51,29 @@ class _DailyGoalsScreenState extends State<DailyGoalsScreen> with SingleTickerPr
   }
 
   Future<void> _loadData() async {
-    final db = DatabaseHelper.instance;
-    _todayMins = await db.getTodaySessionMins();
-    _todayWords = await db.getTodayWordCount();
-    _quizDone = await db.quizDoneToday();
-    _streak = await db.getCurrentStreak();
-    _last7Days = await db.getLast7DaysStreaks();
+    try {
+      final db = DatabaseHelper.instance;
+      _todayMins = await db.getTodaySessionMins();
+      _todayWords = await db.getTodayWordCount();
+      _quizDone = await db.quizDoneToday();
+      _streak = await db.getCurrentStreak();
+      _last7Days = await db.getLast7DaysStreaks();
 
-    final userProvider = context.read<UserProvider>();
-    final streakProvider = context.read<StreakProvider>();
-    await userProvider.loadUser();
-    await streakProvider.loadStreak();
+      final userProvider = context.read<UserProvider>();
+      final streakProvider = context.read<StreakProvider>();
+      await userProvider.loadUser();
+      await streakProvider.loadStreak();
 
-    if (mounted) {
-      setState(() {});
+      _checkGoalsCompletion(userProvider.dailyGoalMins);
+    } catch (e) {
+      debugPrint("Error loading daily goals data: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
-
-    _checkGoalsCompletion(userProvider.dailyGoalMins);
   }
 
   Future<void> _checkGoalsCompletion(int minutesGoal) async {
@@ -189,9 +205,30 @@ class _DailyGoalsScreenState extends State<DailyGoalsScreen> with SingleTickerPr
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
+      body: _isLoading
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    color: AppColors.brightGreen,
+                    strokeWidth: 3,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Syncing your milestones...',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : Stack(
+              children: [
+                SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

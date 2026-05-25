@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../providers/user_provider.dart';
 import '../../core/widgets/background_scaffold.dart';
+import '../../core/widgets/app_avatar.dart';
 import 'ai_chat_screen.dart';
 
 class PracticeTopicsScreen extends StatelessWidget {
@@ -92,13 +93,10 @@ class PracticeTopicsScreen extends StatelessWidget {
             // Header User Info Banner
             Row(
               children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: AppColors.accentGreen.withOpacity(0.2),
-                  child: Text(
-                    userProvider.avatar,
-                    style: const TextStyle(fontSize: 24),
-                  ),
+                AppAvatar(
+                  avatarIndex: userProvider.avatarIndex,
+                  customAvatarBase64: userProvider.customAvatarBase64,
+                  size: 48,
                 ),
                 const SizedBox(width: 14),
                 Expanded(

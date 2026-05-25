@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/widgets/background_scaffold.dart';
 
 class SessionHistoryDetailScreen extends StatelessWidget {
   final Map<String, dynamic> session;
@@ -36,8 +37,7 @@ class SessionHistoryDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final chatLogs = _parseChatLogs();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return BackgroundScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

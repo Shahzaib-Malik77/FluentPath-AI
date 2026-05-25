@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../data/database/database_helper.dart';
@@ -22,6 +24,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final TextEditingController _nameController = TextEditingController();
   int _currentPage = 0;
   int _selectedAvatar = 0;
+  String? _customAvatarBase64;
 
   final List<Map<String, dynamic>> _onboardingData = [
     {
@@ -85,6 +88,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isOnboarded', true);
+    if (_customAvatarBase64 != null) {
+      await prefs.setString('custom_avatar_base64', _customAvatarBase64!);
+    } else {
+      await prefs.remove('custom_avatar_base64');
+    }
 
     if (mounted) {
       await context.read<UserProvider>().loadUser();
@@ -95,12 +103,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  Future<void> _pickCustomAvatar() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 500,
+        maxHeight: 500,
+        imageQuality: 85,
+      );
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        final base64String = base64Encode(bytes);
+        setState(() {
+          _customAvatarBase64 = base64String;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick image: $e'),
+            backgroundColor: AppColors.wrong,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildAvatarWidget(int index, bool isSelected) {
     return AppAvatar(
       avatarIndex: index,
       size: 54,
-      isSelected: isSelected,
-      onTap: () => setState(() => _selectedAvatar = index),
+      isSelected: isSelected && _customAvatarBase64 == null,
+      onTap: () => setState(() {
+        _selectedAvatar = index;
+        _customAvatarBase64 = null;
+      }),
     );
   }
 
@@ -163,32 +202,65 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       children: [
                         if (!keyboardOpen) ...[
                           const SizedBox(height: 30),
-                          // Premium styled illustration using containers/icons
-                          Container(
-                            width: 140,
-                            height: 140,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: data['gradient'],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: (data['gradient'] as List<Color>)[0].withOpacity(0.4),
-                                  blurRadius: 24,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              data['icon'],
-                              size: 70,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 40),
+                           // Premium styled illustration using containers/icons
+                           isLast
+                               ? Padding(
+                                   padding: const EdgeInsets.only(top: 10),
+                                   child: GestureDetector(
+                                     onTap: _pickCustomAvatar,
+                                     child: Stack(
+                                       alignment: Alignment.center,
+                                       children: [
+                                         AppAvatar(
+                                           avatarIndex: _selectedAvatar,
+                                           customAvatarBase64: _customAvatarBase64,
+                                           size: 130,
+                                         ),
+                                         Positioned(
+                                           bottom: 0,
+                                           right: 0,
+                                           child: Container(
+                                             padding: const EdgeInsets.all(8),
+                                             decoration: const BoxDecoration(
+                                               color: AppColors.brightGreen,
+                                               shape: BoxShape.circle,
+                                             ),
+                                             child: const Icon(
+                                               Icons.camera_alt_rounded,
+                                               color: Colors.white,
+                                               size: 18,
+                                             ),
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   ),
+                                 )
+                               : Container(
+                                   width: 140,
+                                   height: 140,
+                                   decoration: BoxDecoration(
+                                     shape: BoxShape.circle,
+                                     gradient: LinearGradient(
+                                       colors: data['gradient'],
+                                       begin: Alignment.topLeft,
+                                       end: Alignment.bottomRight,
+                                     ),
+                                     boxShadow: [
+                                       BoxShadow(
+                                         color: (data['gradient'] as List<Color>)[0].withOpacity(0.4),
+                                         blurRadius: 24,
+                                         spreadRadius: 2,
+                                       ),
+                                     ],
+                                   ),
+                                   child: Icon(
+                                     data['icon'],
+                                     size: 70,
+                                     color: Colors.white,
+                                   ),
+                                 ),
+                           const SizedBox(height: 40),
                         ],
                         Text(
                           data['title'],

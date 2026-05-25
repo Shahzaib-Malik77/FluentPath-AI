@@ -274,6 +274,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
     final streakProvider = context.watch<StreakProvider>();
 
     return BackgroundScaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -401,11 +402,14 @@ class _AIChatScreenState extends State<AIChatScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Chat bubble listing
-            Expanded(
+      body: Column(
+        key: const ValueKey('chat_main_column'),
+        children: [
+          // Chat bubble listing
+          Expanded(
+            child: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              behavior: HitTestBehavior.translucent,
               child: chatProvider.messages.isEmpty
                   ? Center(
                       child: Column(
@@ -431,13 +435,16 @@ class _AIChatScreenState extends State<AIChatScreen> {
                       },
                     ),
             ),
+          ),
 
-            // Live Grammar & Vocabulary Feedback Box (active when there is a grammar correction OR a difficult word explorer)
-            if ((_grammarCorrection != null && _grammarCorrection!.isNotEmpty) || _explorerWord != null)
-              _buildGrammarFeedback(),
+          // Live Grammar & Vocabulary Feedback Box (active when there is a grammar correction OR a difficult word explorer)
+          if (((_grammarCorrection != null && _grammarCorrection!.isNotEmpty) || _explorerWord != null) && !_isFeedbackDismissed)
+            _buildGrammarFeedback(),
 
-            // Chat typing / recording action bar
-            Container(
+          // Chat typing / recording action bar
+          SafeArea(
+            top: false,
+            child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.bgMedBrown,
@@ -530,8 +537,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

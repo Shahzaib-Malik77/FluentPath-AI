@@ -75,6 +75,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       'assets/images/logo_square.png',
                       fit: BoxFit.cover,
                       filterQuality: FilterQuality.high,
+                      cacheWidth: 440,
+                      cacheHeight: 440,
                       errorBuilder: (context, error, stackTrace) {
                         return const Center(
                           child: Icon(
