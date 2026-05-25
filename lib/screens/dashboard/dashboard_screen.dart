@@ -73,7 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final percent = dailyGoal > 0 ? ((_todayMins / dailyGoal) * 100).clamp(0, 100).toInt() : 0;
 
     return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {

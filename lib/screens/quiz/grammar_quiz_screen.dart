@@ -5,6 +5,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../providers/quiz_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/streak_provider.dart';
+import '../../core/widgets/background_scaffold.dart';
 
 class GrammarQuizScreen extends StatefulWidget {
   const GrammarQuizScreen({super.key});
@@ -61,8 +62,7 @@ class _GrammarQuizScreenState extends State<GrammarQuizScreen> {
     }
 
     if (quizProvider.questions.isEmpty) {
-      return Scaffold(
-        backgroundColor: AppColors.bgDarkGreen,
+      return BackgroundScaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -87,10 +87,9 @@ class _GrammarQuizScreenState extends State<GrammarQuizScreen> {
     final int qNum = quizProvider.currentIndex + 1;
     final int totalQ = quizProvider.questions.length;
 
-    return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+    return BackgroundScaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.bgDarkGreen,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
@@ -206,15 +205,16 @@ class _GrammarQuizScreenState extends State<GrammarQuizScreen> {
                 if (isAnswered) {
                   if (isCorrect) {
                     borderColor = AppColors.accentGreen;
-                    cardColor = AppColors.accentGreen.withOpacity(0.08);
+                    cardColor = const Color(0xFFE8F5E9); // Solid, fully opaque premium light pastel green
                     trailingIcon = const Icon(Icons.check_circle_rounded, color: AppColors.accentGreen);
                   } else if (isSelected) {
                     borderColor = AppColors.ctaRed;
-                    cardColor = AppColors.ctaRed.withOpacity(0.08);
+                    cardColor = const Color(0xFFFFEBEE); // Solid, fully opaque premium light pastel red/pink
                     trailingIcon = const Icon(Icons.cancel_rounded, color: AppColors.ctaRed);
                   }
                 } else if (isSelected) {
                   borderColor = AppColors.primaryGreen;
+                  cardColor = const Color(0xFFF1F8E9); // Solid soft mint/white for selected state
                 }
 
                 return GestureDetector(
@@ -284,7 +284,7 @@ class _GrammarQuizScreenState extends State<GrammarQuizScreen> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.ctaRed,
+                  backgroundColor: AppColors.brightGreen,
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: Colors.white10,
                   disabledForegroundColor: Colors.white24,
@@ -311,8 +311,7 @@ class _GrammarQuizScreenState extends State<GrammarQuizScreen> {
     final int total = quizProvider.questions.length;
     final double accuracy = total > 0 ? (score / total) * 100 : 0.0;
 
-    return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+    return BackgroundScaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),

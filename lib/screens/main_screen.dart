@@ -5,6 +5,8 @@ import 'progress/progress_screen.dart';
 import 'profile/profile_screen.dart';
 import '../core/constants/app_colors.dart';
 
+import '../core/widgets/background_scaffold.dart';
+
 class MainScreen extends StatefulWidget {
   final int initialIndex;
   const MainScreen({super.key, this.initialIndex = 0});
@@ -30,8 +32,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_index],
+    return BackgroundScaffold(
+      body: IndexedStack(
+        index: _index,
+        children: _screens,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),

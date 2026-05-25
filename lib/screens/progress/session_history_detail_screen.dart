@@ -37,9 +37,9 @@ class SessionHistoryDetailScreen extends StatelessWidget {
     final chatLogs = _parseChatLogs();
 
     return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.bgDarkGreen,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),

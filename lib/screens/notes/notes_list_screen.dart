@@ -56,9 +56,9 @@ class _NotesListScreenState extends State<NotesListScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.bgDarkGreen,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
           'Study Notes',
@@ -261,139 +261,226 @@ class _NotesListScreenState extends State<NotesListScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.bgDarkGreen,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            left: 24,
-            right: 24,
-            top: 24,
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.bgDarkGreen,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Create Study Note',
-                    style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Colors.white54),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: titleController,
-                style: const TextStyle(color: AppColors.textDark),
-                decoration: InputDecoration(
-                  labelText: 'Title',
-                  labelStyle: const TextStyle(color: Colors.black54),
-                  filled: true,
-                  fillColor: AppColors.bgMedBrown,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: contentController,
-                style: const TextStyle(color: AppColors.textDark),
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: 'Write your notes or explanations here...',
-                  labelStyle: const TextStyle(color: Colors.black54),
-                  filled: true,
-                  fillColor: AppColors.bgMedBrown,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Category Choice Dropdown
-              DropdownButtonFormField<String>(
-                dropdownColor: AppColors.bgCream,
-                initialValue: category,
-                decoration: InputDecoration(
-                  labelText: 'Category',
-                  labelStyle: const TextStyle(color: Colors.black54),
-                  filled: true,
-                  fillColor: AppColors.bgMedBrown,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                style: const TextStyle(color: AppColors.textDark),
-                items: const [
-                  DropdownMenuItem(value: 'Grammar', child: Text('Grammar Rule', style: TextStyle(color: AppColors.textDark))),
-                  DropdownMenuItem(value: 'Vocabulary', child: Text('Vocabulary Phrase', style: TextStyle(color: AppColors.textDark))),
-                  DropdownMenuItem(value: 'Phonetics', child: Text('Phonetic Tip', style: TextStyle(color: AppColors.textDark))),
-                  DropdownMenuItem(value: 'General', child: Text('General Concept', style: TextStyle(color: AppColors.textDark))),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    category = val;
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final title = titleController.text.trim();
-                    final content = contentController.text.trim();
-                    if (title.isEmpty || content.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill out all fields.')),
-                      );
-                      return;
-                    }
-                    
-                    await notesProvider.addNote(
-                      title,
-                      content,
-                      category,
-                    );
-                    
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Saved note: "$title"!'),
-                          backgroundColor: AppColors.accentGreen,
-                        ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brightGreen,
-                    foregroundColor: AppColors.bgDarkGreen,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              left: 24,
+              right: 24,
+              top: 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Premium drag handle
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2.5),
                     ),
                   ),
-                  child: const Text('Save Note', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.edit_note_rounded, color: AppColors.brightGreen, size: 28),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Create Study Note',
+                          style: AppTextStyles.heading2.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: titleController,
+                  style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+                  decoration: InputDecoration(
+                    hintText: 'Title',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.04),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.08), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppColors.brightGreen, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: contentController,
+                  style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    hintText: 'Write your notes or explanations here...',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.04),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.08), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppColors.brightGreen, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '  Category',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  dropdownColor: AppColors.bgDarkGreen,
+                  initialValue: category,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.04),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.08), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppColors.brightGreen, width: 1.5),
+                    ),
+                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'Grammar',
+                      child: Row(
+                        children: const [
+                          Icon(Icons.g_translate_rounded, color: AppColors.brightGreen, size: 18),
+                          SizedBox(width: 8),
+                          Text('Grammar Rule', style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Vocabulary',
+                      child: Row(
+                        children: const [
+                          Icon(Icons.translate_rounded, color: AppColors.brightGreen, size: 18),
+                          SizedBox(width: 8),
+                          Text('Vocabulary Phrase', style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Phonetics',
+                      child: Row(
+                        children: const [
+                          Icon(Icons.record_voice_over_rounded, color: AppColors.brightGreen, size: 18),
+                          SizedBox(width: 8),
+                          Text('Phonetic Tip', style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'General',
+                      child: Row(
+                        children: const [
+                          Icon(Icons.lightbulb_outline_rounded, color: AppColors.brightGreen, size: 18),
+                          SizedBox(width: 8),
+                          Text('General Concept', style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) {
+                      category = val;
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.brightGreen, Color(0xFF4CAF50)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.brightGreen.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final title = titleController.text.trim();
+                      final content = contentController.text.trim();
+                      if (title.isEmpty || content.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please fill out all fields.')),
+                        );
+                        return;
+                      }
+                      
+                      await notesProvider.addNote(
+                        title,
+                        content,
+                        category,
+                      );
+                      
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Saved note: "$title"!'),
+                            backgroundColor: AppColors.correct,
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Save Note', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

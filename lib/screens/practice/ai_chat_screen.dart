@@ -9,6 +9,7 @@ import '../../providers/streak_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../services/groq_service.dart';
+import '../../core/widgets/background_scaffold.dart';
 
 class AIChatScreen extends StatefulWidget {
   final String scenarioTitle;
@@ -46,6 +47,11 @@ class _AIChatScreenState extends State<AIChatScreen> {
   String? _explorerExample;
   bool _isSavedToLibrary = false;
   ChatProvider? _chatProvider;
+
+  // Feedback dismissal states
+  bool _isFeedbackDismissed = false;
+  bool _isFeedbackCollapsed = false;
+  String? _lastProcessedReply;
 
   @override
   void initState() {
@@ -122,7 +128,15 @@ class _AIChatScreenState extends State<AIChatScreen> {
       if (provider.messages.isNotEmpty && !provider.isLoading) {
         final lastMsg = provider.messages.last;
         if (lastMsg['role'] == 'assistant') {
-          _parseAndSetExplorerWord(lastMsg['content'] ?? '');
+          final content = lastMsg['content'] ?? '';
+          if (content != _lastProcessedReply) {
+            _lastProcessedReply = content;
+            _isFeedbackDismissed = false;
+            _isFeedbackCollapsed = false;
+          }
+          if (!_isFeedbackDismissed) {
+            _parseAndSetExplorerWord(content);
+          }
         }
       }
     }
@@ -231,7 +245,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
   Future<void> _analyzeGrammar(String text) async {
     try {
       final feedback = await GroqService.analyzeUserGrammar(text);
-      if (mounted && feedback['has_errors'] == true) {
+      if (mounted && !_isFeedbackDismissed && feedback['has_errors'] == true) {
         setState(() {
           _grammarCorrection = feedback['correction'];
           _vocabSuggestion = feedback['vocab_suggestion'];
@@ -239,12 +253,14 @@ class _AIChatScreenState extends State<AIChatScreen> {
         });
         _scrollToBottom();
       } else {
-        setState(() {
-          _grammarCorrection = null;
-          _vocabSuggestion = null;
-          _correctionExplanation = null;
-        });
-        _scrollToBottom();
+        if (mounted && !_isFeedbackDismissed) {
+          setState(() {
+            _grammarCorrection = null;
+            _vocabSuggestion = null;
+            _correctionExplanation = null;
+          });
+          _scrollToBottom();
+        }
       }
     } catch (_) {
       // Quietly ignore network analyzer errors
@@ -257,10 +273,9 @@ class _AIChatScreenState extends State<AIChatScreen> {
     final userProvider = context.watch<UserProvider>();
     final streakProvider = context.watch<StreakProvider>();
 
-    return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+    return BackgroundScaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.bgDarkGreen,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
@@ -735,6 +750,51 @@ class _AIChatScreenState extends State<AIChatScreen> {
   }
 
   Widget _buildGrammarFeedback() {
+    if (_isFeedbackCollapsed) {
+      return GestureDetector(
+        onTap: () {
+          setState(() {
+            _isFeedbackCollapsed = false;
+          });
+          _scrollToBottom();
+        },
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9FBE7),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.brightGreen.withValues(alpha: 0.3), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 6,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.auto_awesome_rounded, color: AppColors.primaryGreen, size: 18),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Tap to view Grammar Feedback & Word Explorer',
+                  style: TextStyle(
+                    color: AppColors.primaryGreen,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+              const Icon(Icons.keyboard_arrow_up_rounded, color: AppColors.primaryGreen, size: 20),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -769,6 +829,18 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 ),
               ),
               const Spacer(),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54, size: 24),
+                onPressed: () {
+                  setState(() {
+                    _isFeedbackCollapsed = true;
+                  });
+                  _scrollToBottom();
+                },
+              ),
+              const SizedBox(width: 12),
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -778,6 +850,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
                     _explorerWord = null;
                     _explorerMeaning = null;
                     _explorerExample = null;
+                    _isFeedbackDismissed = true;
                   });
                   _scrollToBottom();
                 },
@@ -958,6 +1031,16 @@ class _AIChatScreenState extends State<AIChatScreen> {
 
     _messageController.clear();
     _scrollToBottom();
+
+    setState(() {
+      _isFeedbackDismissed = false;
+      _grammarCorrection = null;
+      _vocabSuggestion = null;
+      _correctionExplanation = null;
+      _explorerWord = null;
+      _explorerMeaning = null;
+      _explorerExample = null;
+    });
 
     // Trigger local AI grammar analyzer in the background
     _analyzeGrammar(text);

@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../main_screen.dart';
+import '../../core/widgets/background_scaffold.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -45,8 +46,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+    return BackgroundScaffold(
       body: Stack(
         children: [
           // Center content
@@ -55,26 +55,35 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               mainAxisAlignment: MainState.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo Container
+                // Custom Logo
                 Container(
-                  width: 100,
-                  height: 100,
+                  width: 220,
+                  height: 220,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(40),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.brightGreen.withOpacity(0.3),
-                        blurRadius: 20,
-                        spreadRadius: 2,
+                        color: AppColors.brightGreen.withOpacity(0.15),
+                        blurRadius: 30,
+                        spreadRadius: 5,
                       ),
                     ],
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.mic_rounded,
-                      size: 60,
-                      color: AppColors.primaryGreen,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(40),
+                    child: Image.asset(
+                      'assets/images/logo_square.png',
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.high,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.image_not_supported_rounded,
+                            size: 60,
+                            color: AppColors.primaryGreen,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -114,26 +123,30 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 AnimatedBuilder(
                   animation: _waveController,
                   builder: (context, child) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(12, (index) {
-                        // Stagger the wave using a sine function of time and index
-                        final double level = (1.0 + double.parse(((index % 2 == 0) ? 
-                          (0.5 * (1.0 + (1.0 - _waveController.value))) : 
-                          (0.5 * (1.0 + _waveController.value))).toString())) / 2.0;
-                        final double scale = (0.3 + 0.7 * level);
-                        final double height = 8.0 + 40.0 * scale;
+                    return SizedBox(
+                      height: 50,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: List.generate(12, (index) {
+                          // Stagger the wave using a sine function of time and index
+                          final double level = (1.0 + double.parse(((index % 2 == 0) ? 
+                            (0.5 * (1.0 + (1.0 - _waveController.value))) : 
+                            (0.5 * (1.0 + _waveController.value))).toString())) / 2.0;
+                          final double scale = (0.3 + 0.7 * level);
+                          final double height = 8.0 + 40.0 * scale;
 
-                        return Container(
-                          width: 4,
-                          height: height,
-                          margin: const EdgeInsets.symmetric(horizontal: 2.0),
-                          decoration: BoxDecoration(
-                            color: AppColors.accentGreen,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        );
-                      }),
+                          return Container(
+                            width: 4,
+                            height: height,
+                            margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                            decoration: BoxDecoration(
+                              color: AppColors.accentGreen,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          );
+                        }),
+                      ),
                     );
                   },
                 ),

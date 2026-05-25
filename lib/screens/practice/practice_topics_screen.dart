@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../providers/user_provider.dart';
+import '../../core/widgets/background_scaffold.dart';
 import 'ai_chat_screen.dart';
 
 class PracticeTopicsScreen extends StatelessWidget {
@@ -69,10 +70,9 @@ class PracticeTopicsScreen extends StatelessWidget {
       },
     ];
 
-    return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+    return BackgroundScaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.bgDarkGreen,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
@@ -329,122 +329,169 @@ class PracticeTopicsScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.bgDarkGreen,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            left: 24,
-            right: 24,
-            top: 24,
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.bgDarkGreen,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Custom Scenario Builder',
-                    style: AppTextStyles.heading3.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              left: 24,
+              right: 24,
+              top: 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Premium drag handle
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2.5),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Colors.white54),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Design your own immersive practice scene. Specify a topic title and details of who the AI should pretend to be.',
-                style: AppTextStyles.caption.copyWith(color: Colors.white60),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: titleController,
-                style: const TextStyle(color: AppColors.textDark),
-                decoration: InputDecoration(
-                  labelText: 'Scenario Title (e.g. Asking Directions)',
-                  labelStyle: const TextStyle(color: AppColors.textMuted),
-                  filled: true,
-                  fillColor: AppColors.bgMedBrown,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixIcon: const Icon(Icons.title_rounded, color: AppColors.textMuted),
                 ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: descController,
-                style: const TextStyle(color: AppColors.textDark),
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: 'Who is the AI? (e.g. A police officer in Boston)',
-                  labelStyle: const TextStyle(color: AppColors.textMuted),
-                  filled: true,
-                  fillColor: AppColors.bgMedBrown,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixIcon: const Icon(Icons.description_outlined, color: AppColors.textMuted),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final title = titleController.text.trim();
-                    final desc = descController.text.trim();
-                    if (title.isEmpty || desc.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill out all fields.')),
-                      );
-                      return;
-                    }
-                    Navigator.pop(context); // Close sheet
-
-                    final customPrompt =
-                        'You are an AI character practicing English with the user. Your role: $desc. Keep answers engaging, natural, conversational, and under 3 sentences. Assist the user with correct speaking patterns and prompt them politely when needed.';
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => AIChatScreen(
-                          scenarioTitle: title,
-                          systemPrompt: customPrompt,
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.psychology_rounded, color: AppColors.brightGreen, size: 28),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Custom Scenario Builder',
+                          style: AppTextStyles.heading2.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brightGreen,
-                    foregroundColor: AppColors.bgDarkGreen,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      ],
                     ),
-                  ),
-                  child: const Text(
-                    'Launch Custom Scenario',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Design your own immersive practice scene. Specify a topic title and details of who the AI should pretend to be.',
+                  style: AppTextStyles.caption.copyWith(color: Colors.white60, height: 1.4),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: titleController,
+                  style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+                  decoration: InputDecoration(
+                    labelText: 'Scenario Title (e.g. Asking Directions)',
+                    labelStyle: const TextStyle(color: Colors.white38, fontSize: 13),
+                    floatingLabelStyle: const TextStyle(color: AppColors.brightGreen, fontSize: 14),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.04),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.08), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppColors.brightGreen, width: 1.5),
+                    ),
+                    prefixIcon: const Icon(Icons.title_rounded, color: Colors.white54),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descController,
+                  style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Who is the AI? (e.g. A police officer in Boston)',
+                    labelStyle: const TextStyle(color: Colors.white38, fontSize: 13),
+                    floatingLabelStyle: const TextStyle(color: AppColors.brightGreen, fontSize: 14),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.04),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.08), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppColors.brightGreen, width: 1.5),
+                    ),
+                    prefixIcon: const Icon(Icons.description_outlined, color: Colors.white54),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.brightGreen, Color(0xFF4CAF50)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.brightGreen.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final title = titleController.text.trim();
+                      final desc = descController.text.trim();
+                      if (title.isEmpty || desc.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please fill out all fields.')),
+                        );
+                        return;
+                      }
+                      Navigator.pop(context); // Close sheet
+
+                      final customPrompt =
+                          'You are an AI character practicing English with the user. Your role: $desc. Keep answers engaging, natural, conversational, and under 3 sentences. Assist the user with correct speaking patterns and prompt them politely when needed.';
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AIChatScreen(
+                            scenarioTitle: title,
+                            systemPrompt: customPrompt,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Launch Custom Scenario',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

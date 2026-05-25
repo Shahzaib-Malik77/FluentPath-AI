@@ -7,6 +7,7 @@ import '../../providers/user_provider.dart';
 import '../../providers/streak_provider.dart';
 import '../../data/database/database_helper.dart';
 import '../splash/splash_screen.dart';
+import '../../core/widgets/app_avatar.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -17,9 +18,9 @@ class ProfileScreen extends StatelessWidget {
     final streakProvider = context.watch<StreakProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.bgDarkGreen,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
           'My Profile',
@@ -37,12 +38,11 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   Stack(
                     children: [
-                      CircleAvatar(
-                        radius: 54,
-                        backgroundColor: AppColors.brightGreen.withOpacity(0.12),
-                        child: Text(
-                          userProvider.avatar,
-                          style: const TextStyle(fontSize: 54),
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: AppAvatar(
+                          avatarIndex: userProvider.avatarIndex,
+                          size: 100,
                         ),
                       ),
                       Positioned(
@@ -56,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
                               color: AppColors.brightGreen,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.edit_rounded, color: AppColors.bgDarkGreen, size: 18),
+                            child: const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
                           ),
                         ),
                       ),
@@ -188,7 +188,7 @@ class ProfileScreen extends StatelessWidget {
     final List<String> avatars = ['👨‍🎓', '👩‍🎓', '🤖', '🦊', '🐨', '🦁', '🦖', '🦄'];
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -196,59 +196,66 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Choose your avatar style',
-                style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: avatars.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemBuilder: (context, index) {
-                  final av = avatars[index];
-                  return GestureDetector(
-                    onTap: () async {
-                      await userProvider.updateProfile(
-                        name: userProvider.name,
-                        avatar: av,
-                        level: userProvider.level,
-                        dailyGoalMins: userProvider.dailyGoalMins,
-                      );
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: userProvider.avatar == av ? AppColors.brightGreen.withOpacity(0.15) : AppColors.bgMedBrown,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: userProvider.avatar == av ? AppColors.brightGreen : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          av,
-                          style: const TextStyle(fontSize: 32),
-                        ),
-                      ),
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.bgDarkGreen,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2.5),
                     ),
-                  );
-                },
-              ),
-            ],
+                  ),
+                ),
+                Text(
+                  'Choose your avatar style',
+                  style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 20),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: avatars.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemBuilder: (context, index) {
+                    final av = avatars[index];
+                    return AppAvatar(
+                      avatarIndex: index,
+                      size: 54,
+                      isSelected: userProvider.avatarIndex == index,
+                      onTap: () async {
+                        await userProvider.updateProfile(
+                          name: userProvider.name,
+                          avatar: av,
+                          level: userProvider.level,
+                          dailyGoalMins: userProvider.dailyGoalMins,
+                        );
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -260,7 +267,7 @@ class ProfileScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -268,63 +275,90 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            left: 24,
-            right: 24,
-            top: 24,
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.bgDarkGreen,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Edit Profile Name',
-                style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: controller,
-                style: const TextStyle(color: AppColors.textDark),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.bgMedBrown,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              left: 24,
+              right: 24,
+              top: 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final name = controller.text.trim();
-                    if (name.isEmpty) return;
-
-                    await userProvider.updateProfile(
-                      name: name,
-                      avatar: userProvider.avatar,
-                      level: userProvider.level,
-                      dailyGoalMins: userProvider.dailyGoalMins,
-                    );
-
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brightGreen,
-                    foregroundColor: AppColors.bgDarkGreen,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Edit Profile Name',
+                  style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+                TextField(
+                  controller: controller,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.08),
+                    hintText: 'Enter your name',
+                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.1), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppColors.brightGreen, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final name = controller.text.trim();
+                      if (name.isEmpty) return;
+
+                      await userProvider.updateProfile(
+                        name: name,
+                        avatar: userProvider.avatar,
+                        level: userProvider.level,
+                        dailyGoalMins: userProvider.dailyGoalMins,
+                      );
+
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brightGreen,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 4,
+                    ),
+                    child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -335,7 +369,7 @@ class ProfileScreen extends StatelessWidget {
     double tempVal = userProvider.dailyGoalMins.toDouble();
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -345,57 +379,78 @@ class ProfileScreen extends StatelessWidget {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Set Study Goal (minutes)',
-                    style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    '${tempVal.toInt()} Minutes Daily',
-                    style: const TextStyle(color: AppColors.brightGreen, fontSize: 32, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  Slider(
-                    value: tempVal,
-                    min: 5,
-                    max: 60,
-                    divisions: 11,
-                    activeColor: AppColors.brightGreen,
-                    inactiveColor: Colors.white12,
-                    onChanged: (val) {
-                      setSheetState(() => tempVal = val);
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await userProvider.updateProfile(
-                          name: userProvider.name,
-                          avatar: userProvider.avatar,
-                          level: userProvider.level,
-                          dailyGoalMins: tempVal.toInt(),
-                        );
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.brightGreen,
-                        foregroundColor: AppColors.bgDarkGreen,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            return Container(
+              decoration: const BoxDecoration(
+                color: AppColors.bgDarkGreen,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white24,
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
                       ),
-                      child: const Text('Save Goal', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
-                  ),
-                ],
+                    Text(
+                      'Set Study Goal (minutes)',
+                      style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      '${tempVal.toInt()} Minutes Daily',
+                      style: const TextStyle(color: AppColors.brightGreen, fontSize: 32, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    Slider(
+                      value: tempVal,
+                      min: 5,
+                      max: 60,
+                      divisions: 11,
+                      activeColor: AppColors.brightGreen,
+                      inactiveColor: Colors.white12,
+                      onChanged: (val) {
+                        setSheetState(() => tempVal = val);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await userProvider.updateProfile(
+                            name: userProvider.name,
+                            avatar: userProvider.avatar,
+                            level: userProvider.level,
+                            dailyGoalMins: tempVal.toInt(),
+                          );
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.brightGreen,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 4,
+                        ),
+                        child: const Text('Save Goal', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -407,7 +462,7 @@ class ProfileScreen extends StatelessWidget {
   void _showLevelReassessmentSheet(BuildContext context, UserProvider userProvider) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -415,34 +470,57 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Adjust Assessment Level',
-                style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              ListTile(
-                title: const Text('Beginner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Simple roleplays and elementary quiz grammar topics.', style: TextStyle(color: Colors.white38, fontSize: 11)),
-                onTap: () => _updateLevel(context, userProvider, 'beginner'),
-              ),
-              const Divider(color: Colors.white12),
-              ListTile(
-                title: const Text('Intermediate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Everyday conversations and fluid dialogue structures.', style: TextStyle(color: Colors.white38, fontSize: 11)),
-                onTap: () => _updateLevel(context, userProvider, 'intermediate'),
-              ),
-              const Divider(color: Colors.white12),
-              ListTile(
-                title: const Text('Advanced', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Complex sentence queries and rapid corporate HR simulations.', style: TextStyle(color: Colors.white38, fontSize: 11)),
-                onTap: () => _updateLevel(context, userProvider, 'advanced'),
-              ),
-            ],
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.bgDarkGreen,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Adjust Assessment Level',
+                  style: AppTextStyles.heading3.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 20),
+                ListTile(
+                  leading: const Icon(Icons.school_outlined, color: AppColors.brightGreen),
+                  title: const Text('Beginner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Simple roleplays and elementary quiz grammar topics.', style: TextStyle(color: Colors.white38, fontSize: 11)),
+                  onTap: () => _updateLevel(context, userProvider, 'beginner'),
+                ),
+                const Divider(color: Colors.white12),
+                ListTile(
+                  leading: const Icon(Icons.psychology_outlined, color: AppColors.brightGreen),
+                  title: const Text('Intermediate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Everyday conversations and fluid dialogue structures.', style: TextStyle(color: Colors.white38, fontSize: 11)),
+                  onTap: () => _updateLevel(context, userProvider, 'intermediate'),
+                ),
+                const Divider(color: Colors.white12),
+                ListTile(
+                  leading: const Icon(Icons.workspace_premium_outlined, color: AppColors.brightGreen),
+                  title: const Text('Advanced', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Complex sentence queries and rapid corporate HR simulations.', style: TextStyle(color: Colors.white38, fontSize: 11)),
+                  onTap: () => _updateLevel(context, userProvider, 'advanced'),
+                ),
+              ],
+            ),
           ),
         );
       },

@@ -6,6 +6,9 @@ import '../../core/constants/app_text_styles.dart';
 import '../../data/database/database_helper.dart';
 import '../../providers/user_provider.dart';
 import '../main_screen.dart';
+import '../../core/widgets/background_scaffold.dart';
+
+import '../../core/widgets/app_avatar.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -51,8 +54,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _nextPage() {
     if (_currentPage < 2) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
       );
     }
   }
@@ -92,62 +95,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  // Pre-configured custom avatars using beautiful vector designs & gradients
   Widget _buildAvatarWidget(int index, bool isSelected) {
-    final List<List<Color>> gradients = [
-      [const Color(0xFFAFE6C3), const Color(0xFF387F4A)],
-      [Colors.cyan, Colors.blue],
-      [Colors.purple, Colors.pink],
-      [Colors.green, Colors.teal],
-      [const Color(0xFFDAE2CB), const Color(0xFF1E4627)],
-    ];
-
-    final List<IconData> icons = [
-      Icons.face_rounded,
-      Icons.sentiment_satisfied_alt_rounded,
-      Icons.portrait_rounded,
-      Icons.emoji_emotions_rounded,
-      Icons.supervisor_account_rounded,
-    ];
-
-    return GestureDetector(
+    return AppAvatar(
+      avatarIndex: index,
+      size: 54,
+      isSelected: isSelected,
       onTap: () => setState(() => _selectedAvatar = index),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6),
-        padding: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isSelected ? AppColors.accentGreen : Colors.transparent,
-            width: 3,
-          ),
-        ),
-        child: Container(
-          width: 54,
-          height: 54,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: gradients[index],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              if (isSelected)
-                BoxShadow(
-                  color: AppColors.accentGreen.withOpacity(0.4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-            ],
-          ),
-          child: Icon(
-            icons[index],
-            color: Colors.white,
-            size: 30,
-          ),
-        ),
-      ),
     );
   }
 
@@ -155,8 +108,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
-    return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+    return BackgroundScaffold(
       body: SafeArea(
         child: Column(
           children: [
@@ -303,11 +255,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              5,
-                              (idx) => _buildAvatarWidget(idx, _selectedAvatar == idx),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                8,
+                                (idx) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                                  child: _buildAvatarWidget(idx, _selectedAvatar == idx),
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 30),
@@ -349,7 +308,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onPressed: _nextPage,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.ctaBrown,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.primaryGreen,
                         elevation: 4,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -372,7 +331,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           onPressed: _submitOnboarding,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.ctaBrown,
-                            foregroundColor: Colors.white,
+                            foregroundColor: AppColors.primaryGreen,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),

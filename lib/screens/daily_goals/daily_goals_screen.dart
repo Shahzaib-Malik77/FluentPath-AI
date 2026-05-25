@@ -6,6 +6,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../data/database/database_helper.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/streak_provider.dart';
+import '../../core/widgets/background_scaffold.dart';
 
 class DailyGoalsScreen extends StatefulWidget {
   const DailyGoalsScreen({super.key});
@@ -164,34 +165,33 @@ class _DailyGoalsScreenState extends State<DailyGoalsScreen> with SingleTickerPr
     final double vProgress = (_todayWords / 5).clamp(0.0, 1.0);
     final double qProgress = _quizDone ? 1.0 : 0.0;
 
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: AppColors.bgDarkGreen,
-          appBar: AppBar(
-            backgroundColor: AppColors.bgDarkGreen,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: const Text(
-              'Daily Goals',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Streak calendar synced to SQLite!')),
-                  );
-                },
-              ),
-            ],
+    return BackgroundScaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Daily Goals',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Streak calendar synced to SQLite!')),
+              );
+            },
           ),
-          body: SingleChildScrollView(
+        ],
+      ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,21 +368,21 @@ class _DailyGoalsScreenState extends State<DailyGoalsScreen> with SingleTickerPr
               ],
             ),
           ),
-        ),
-        // Confetti animation layer
-        if (_showConfetti)
-          IgnorePointer(
-            child: AnimatedBuilder(
-              animation: _confettiController,
-              builder: (context, child) {
-                return CustomPaint(
-                  size: MediaQuery.of(context).size,
-                  painter: ConfettiPainter(progress: _confettiController.value),
-                );
-              },
+          // Confetti animation layer
+          if (_showConfetti)
+            IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _confettiController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    size: MediaQuery.of(context).size,
+                    painter: ConfettiPainter(progress: _confettiController.value),
+                  );
+                },
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

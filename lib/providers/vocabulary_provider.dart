@@ -4,7 +4,7 @@ import '../services/groq_service.dart';
 
 class VocabularyProvider extends ChangeNotifier {
   List<Map<String, dynamic>> _words = [];
-  Map<String, String>? currentWord;
+  List<Map<String, String>> discoverWords = [];
   bool isGenerating = false;
   String filterStatus = 'all';
 
@@ -18,33 +18,37 @@ class VocabularyProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> generateNewWord() async {
+  Future<void> ensureDiscoverWordsLoaded() async {
+    if (discoverWords.isEmpty && !isGenerating) {
+      await generateVocabularyBatch();
+    }
+  }
+
+  Future<void> generateVocabularyBatch() async {
     isGenerating = true; 
     notifyListeners();
     try { 
-      currentWord = await GroqService.generateVocabularyWord(); 
+      discoverWords = await GroqService.generateVocabularyBatch(); 
     } catch (_) { 
-      currentWord = {
-        'word':'Resilience',
-        'phonetic':'/rɪˈzɪlɪəns/',
-        'meaning':'Ability to recover from difficulties.',
-        'example':'Her resilience helped her overcome challenges.',
-        'usage_tip':'Use when describing strength after hardship.'
-      }; 
+      discoverWords = [];
     }
     isGenerating = false; 
     notifyListeners();
   }
 
-  Future<bool> saveCurrentWord() async {
-    if (currentWord == null) return false;
+  bool isWordSaved(String word) {
+    return _words.any((w) => w['word'].trim().toLowerCase() == word.trim().toLowerCase());
+  }
+
+  Future<bool> saveWord(Map<String, String> word) async {
+    if (isWordSaved(word['word']!)) return false;
     final today = DateTime.now().toIso8601String().split('T')[0];
     await DatabaseHelper.instance.insertWord({
-      'word': currentWord!['word']!, 
-      'phonetic': currentWord!['phonetic'] ?? '',
-      'meaning': currentWord!['meaning']!, 
-      'example': currentWord!['example'] ?? '',
-      'usage_tip': currentWord!['usage_tip'] ?? '', 
+      'word': word['word']!, 
+      'phonetic': word['phonetic'] ?? '',
+      'meaning': word['meaning']!, 
+      'example': word['example'] ?? '',
+      'usage_tip': word['usage_tip'] ?? '', 
       'status': 'learning', 
       'date_added': today,
     });

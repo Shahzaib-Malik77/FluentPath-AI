@@ -125,9 +125,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final streakProvider = context.watch<StreakProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.bgDarkGreen,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.bgDarkGreen,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
           'Progress Analytics',

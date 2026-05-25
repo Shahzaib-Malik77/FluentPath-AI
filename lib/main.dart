@@ -56,9 +56,36 @@ class FluentPathApp extends StatelessWidget {
           surface: AppColors.bgMedBrown,
           onSurface: AppColors.textDark,
         ),
-        useMaterial3: true,
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: FadePageTransitionsBuilder(),
+            TargetPlatform.iOS: FadePageTransitionsBuilder(),
+            TargetPlatform.windows: FadePageTransitionsBuilder(),
+            TargetPlatform.macOS: FadePageTransitionsBuilder(),
+            TargetPlatform.linux: FadePageTransitionsBuilder(),
+          },
+        ),
       ),
       home: const SplashScreen(),
+    );
+  }
+}
+
+// Custom Fade Transition that is GPU-accelerated and buttery-smooth on Web/Mobile
+class FadePageTransitionsBuilder extends PageTransitionsBuilder {
+  const FadePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: animation,
+      child: child,
     );
   }
 }
